@@ -15,11 +15,11 @@ use Matasar\StrikePlagiarism\Document;
 $client = new Client('YOUR_API_KEY');
 
 $document = new Document(
-    'en',
-    'A test document',
-    'Yevhen Matasar',
-    'Yevhen Matasar',
-    __DIR__ . '/test.pdf'
+    'en', // language code (ISO 639-1)
+    'A test document', // title
+    'Yevhen Matasar', // author
+    'Yevhen Matasar', // coordinator
+    __DIR__ . '/test.pdf' // file uri
 );
 
 $response = $client->addDocument($document);

@@ -4,9 +4,6 @@ namespace Matasar\StrikePlagiarism;
 
 class Document
 {
-    use DataTrait;
-    use ValidationTrait;
-
     /**
      * Antiplagiarism analysis
      */
@@ -134,7 +131,11 @@ class Document
      */
     public function setLanguageCode(string $languageCode): void
     {
-        $this->languageCode = $this->validateLanguageCode($languageCode);
+        if (!preg_match('/^[a-z]{2}$/', $languageCode)) {
+            throw new \InvalidArgumentException('Language code must be ISO 639-1 compatible');
+        }
+
+        $this->languageCode = $languageCode;
     }
 
     /**
@@ -296,5 +297,18 @@ class Document
     public function getDocumentKind(): int
     {
         return $this->documentKind;
+    }
+
+    /**
+     * @return array
+     */
+    public function getData(): array
+    {
+        return array_filter(
+            get_object_vars($this),
+            function ($val) {
+                return $val !== null;
+            }
+        );
     }
 }
