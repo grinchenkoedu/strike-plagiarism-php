@@ -1,6 +1,12 @@
 # StrikePlagiarism API v2 client for PHP
 An **unofficial** StrikePlagiarism API v2 client. 
 
+## How to install
+This is a [composer](https://getcomposer.org/doc/00-intro.md) package, to install simply run:
+```
+composer require matasarei/strike-plagiarism-php
+```
+
 ## How to use
 ```php
 use Matasar\StrikePlagiarism\Client;
