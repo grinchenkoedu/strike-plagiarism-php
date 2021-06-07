@@ -80,18 +80,20 @@ class Client
 
     /**
      * @param string $id
+     * @param string|null $lang
      *
      * @return array
      *
      * @throws RequestException
      */
-    public function getReport(string $id): array
+    public function getReport(string $id, string $lang = null): array
     {
         return $this->sendGetRequest(
             'documents/report',
-            [
-                'id' => $id
-            ],
+            array_filter([
+                'id' => $id,
+                'lang' => $lang,
+            ]),
             new FullReportParser()
         );
     }
