@@ -10,11 +10,10 @@
     }
   ],
   "require": {
-    "php": "^7.1",
-    "guzzlehttp/guzzle": "^6.0",
+    "php": ">=7.2",
     "ext-json": "*",
     "sunra/php-simple-html-dom-parser": "^1.5",
-    "guzzlehttp/psr7": "^1.8"
+    "guzzlehttp/guzzle": "^7.6"
   },
   "autoload": {
     "psr-4": {
