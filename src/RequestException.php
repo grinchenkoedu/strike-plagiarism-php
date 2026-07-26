@@ -14,7 +14,7 @@ class RequestException extends \Exception
      */
     protected $data;
 
-    public function __construct(string $message = "", array $data = null, int $statusCode = null)
+    public function __construct(string $message = "", ?array $data = null, ?int $statusCode = null)
     {
         $this->statusCode = $statusCode;
         $this->data = $data;

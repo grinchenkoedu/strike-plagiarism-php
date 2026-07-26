@@ -25,10 +25,13 @@ class Client
      * @param bool $ssl
      * @param string|null $host
      */
-    public function __construct(string $apiKey, bool $ssl = true, string $host = null)
+    public function __construct(string $apiKey, bool $ssl = true, ?string $host = null)
     {
         $this->client = new HttpClient([
-            'base_uri' => $this->getBaseUri($ssl, $host)
+            'base_uri' => $this->getBaseUri($ssl, $host),
+            'headers' => [
+                'Accept' => 'application/json',
+            ],
         ]);
 
         $this->apiKey = $apiKey;
@@ -82,20 +85,92 @@ class Client
      * @param string $id
      * @param string|null $lang
      *
-     * @return array
+     * @return Report
      *
      * @throws RequestException
      */
-    public function getReport(string $id, string $lang = null): array
+    public function getReport(string $id, bool $short = false, ?string $lang = null): Report
     {
-        return $this->sendGetRequest(
+        $data = $this->sendGetRequest(
             'documents/report',
             array_filter([
                 'id' => $id,
+                'short' => $short ? 'true' : null,
                 'lang' => $lang,
-            ]),
-            new FullReportParser()
+            ])
         );
+
+        return new Report($data);
+    }
+
+    /**
+     * Get the raw HTML report directly.
+     *
+     * @param string $id
+     * @param string|null $lang
+     *
+     * @return string
+     *
+     * @throws RequestException
+     */
+    public function getReportHtml(string $id, bool $short = false, ?string $lang = null): string
+    {
+        $parameters = array_filter([
+            'id' => $id,
+            'short' => $short ? 'true' : null,
+            'lang' => $lang,
+        ]);
+
+        $parameters['APIKEY'] = $this->apiKey;
+
+        try {
+            $response = $this->client->get($this->getBaseUri() . 'documents/report', [
+                'query' => $parameters,
+                'headers' => [
+                    'Accept' => 'text/html',
+                ],
+            ]);
+
+            return $response->getBody()->getContents();
+        } catch (\Exception $ex) {
+            $this->handleException($ex);
+        }
+    }
+
+    /**
+     * Get the PDF report directly.
+     *
+     * @param string $id
+     * @param bool $short
+     * @param string|null $lang
+     *
+     * @return string
+     *
+     * @throws RequestException
+     */
+    public function getReportPdf(string $id, bool $short = false, ?string $lang = null): string
+    {
+        $parameters = array_filter([
+            'id' => $id,
+            'short' => $short ? 'true' : null,
+            'pdf' => 'true',
+            'lang' => $lang,
+        ]);
+
+        $parameters['APIKEY'] = $this->apiKey;
+
+        try {
+            $response = $this->client->get($this->getBaseUri() . 'documents/report', [
+                'query' => $parameters,
+                'headers' => [
+                    'Accept' => 'application/pdf',
+                ],
+            ]);
+
+            return $response->getBody()->getContents();
+        } catch (\Exception $ex) {
+            $this->handleException($ex);
+        }
     }
 
     /**
@@ -108,6 +183,44 @@ class Client
     public function removeDocument(string $id): array
     {
         return $this->sendDocumentRequest($id, 'documents/remove');
+    }
+
+    /**
+     * @param string $id
+     *
+     * @return array
+     *
+     * @throws RequestException
+     */
+    public function rejectDocument(string $id): array
+    {
+        return $this->sendDocumentRequest($id, 'documents/reject');
+    }
+
+    /**
+     * @param string $id
+     *
+     * @return array
+     *
+     * @throws RequestException
+     */
+    public function sendForCorrection(string $id): array
+    {
+        return $this->sendDocumentRequest($id, 'documents/send-for-correction');
+    }
+
+    /**
+     * @param string $id
+     *
+     * @return array
+     *
+     * @throws RequestException
+     */
+    public function getProtocols(string $id): array
+    {
+        return $this->sendGetRequest('documents/protocols', [
+            'id' => $id
+        ]);
     }
 
     /**
@@ -154,16 +267,7 @@ class Client
         return $this->sendMultipartRequest($path, $multipart);
     }
 
-    /**
-     * @param string $path
-     * @param array $parameters
-     * @param AbstractParser $parser
-     *
-     * @return array
-     *
-     * @throws RequestException
-     */
-    protected function sendGetRequest(string $path, array $parameters, AbstractParser $parser = null): array
+    protected function sendGetRequest(string $path, array $parameters): array
     {
         $data = [];
 
@@ -174,7 +278,7 @@ class Client
                 'query' => $parameters
             ]);
 
-            $data = $this->getResponseData($response, $parser);
+            $data = $this->getResponseData($response);
         } catch (\Exception $ex) {
             $this->handleException($ex);
         }
@@ -214,17 +318,11 @@ class Client
 
     /**
      * @param ResponseInterface $response
-     * @param AbstractParser|null $parser
      *
      * @return array
      */
-    protected function getResponseData(ResponseInterface $response, AbstractParser $parser = null): array
+    protected function getResponseData(ResponseInterface $response): array
     {
-        if (null !== $parser) {
-            $parser->setContent($response->getBody()->getContents());
-
-            return $parser->parse();
-        }
 
         $data = json_decode($response->getBody()->getContents(), true);
 
@@ -241,7 +339,7 @@ class Client
      *
      * @return string
      */
-    protected function getBaseUri(bool $ssl = true, string $host = null): string
+    protected function getBaseUri(bool $ssl = true, ?string $host = null): string
     {
         return sprintf('%s://%s/api/v2/',
             $ssl ? 'https' : 'http',

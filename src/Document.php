@@ -300,6 +300,111 @@ class Document
     }
 
     /**
+     * @var string|null
+     */
+    protected $callbackUrl;
+
+    /**
+     * @var string|null
+     */
+    protected $userId;
+
+    /**
+     * @var string|null
+     */
+    protected $assignmentId;
+
+    /**
+     * @var bool|null
+     */
+    protected $aiDetection;
+
+    /**
+     * @var bool|null
+     */
+    protected $grammarCheck;
+
+    /**
+     * @param string|null $callbackUrl
+     */
+    public function setCallbackUrl(?string $callbackUrl): void
+    {
+        $this->callbackUrl = $callbackUrl;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getCallbackUrl(): ?string
+    {
+        return $this->callbackUrl;
+    }
+
+    /**
+     * @param string|null $userId
+     */
+    public function setUserId(?string $userId): void
+    {
+        $this->userId = $userId;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getUserId(): ?string
+    {
+        return $this->userId;
+    }
+
+    /**
+     * @param string|null $assignmentId
+     */
+    public function setAssignmentId(?string $assignmentId): void
+    {
+        $this->assignmentId = $assignmentId;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getAssignmentId(): ?string
+    {
+        return $this->assignmentId;
+    }
+
+    /**
+     * @param bool|null $aiDetection
+     */
+    public function setAiDetection(?bool $aiDetection): void
+    {
+        $this->aiDetection = $aiDetection;
+    }
+
+    /**
+     * @return bool|null
+     */
+    public function getAiDetection(): ?bool
+    {
+        return $this->aiDetection;
+    }
+
+    /**
+     * @param bool|null $grammarCheck
+     */
+    public function setGrammarCheck(?bool $grammarCheck): void
+    {
+        $this->grammarCheck = $grammarCheck;
+    }
+
+    /**
+     * @return bool|null
+     */
+    public function getGrammarCheck(): ?bool
+    {
+        return $this->grammarCheck;
+    }
+
+    /**
      * @return array
      */
     public function getData(): array
